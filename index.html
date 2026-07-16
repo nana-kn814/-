@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>乐理闯关 · 音及音律</title>
+    <style>
+        /* ===== 全局重置 & 基础 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Noto Serif SC", "PingFang SC", "Microsoft YaHei", serif;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 50% 30%, #2d1b4e, #0f0822);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ===== 背景装饰音符 ===== */
+        body::before,
+        body::after {
+            content: "♫ ♪ ♬ ♩ ♪ ♫";
+            position: fixed;
+            font-size: 80px;
+            color: rgba(255, 215, 100, 0.04);
+            letter-spacing: 30px;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 0;
+        }
+        body::before {
+            top: 5%;
+            left: -5%;
+            transform: rotate(-8deg);
+        }
+        body::after {
+            bottom: 5%;
+            right: -5%;
+            transform: rotate(12deg);
+            font-size: 100px;
+        }
+
+        /* ===== 主容器 ===== */
+        .game-container {
+            width: 100%;
+            max-width: 780px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-radius: 48px 48px 32px 32px;
+            padding: 28px 26px 34px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 215, 100, 0.15);
+            border: 1px solid rgba(255, 215, 100, 0.12);
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s;
+        }
+
+        /* ===== 顶部主题横幅 ===== */
+        .theme-header {
+            text-align: center;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(255, 215, 100, 0.15);
+            margin-bottom: 22px;
+        }
+        .theme-header .main-title {
+            font-size: clamp(18px, 4.2vw, 28px);
+            font-weight: 700;
+            color: #f0d080;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(240, 208, 128, 0.15);
+            line-height: 1.4;
+        }
+        .theme-header .main-title .highlight {
+            color: #ffd966;
+        }
+        .theme-header .sub-title {
+            font-size: clamp(14px, 2.6vw, 19px);
+            color: rgba(255, 215, 140, 0.75);
+            margin-top: 6px;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+        .theme-header .sub-title .prophet {
+            color: #ffd966;
+            font-weight: 500;
+        }
+
+        /* ===== 页面容器 (登录/游戏/结果) ===== */
+        .page {
+            display: none;
+            animation: fadeSlide 0.45s ease forwards;
+        }
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== 登录页面 ===== */
+        .login-page {
+            padding: 12px 4px 6px;
+        }
+        .login-page .welcome-icon {
+            text-align: center;
+            font-size: 56px;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+        .login-page .welcome-text {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: clamp(15px, 2.8vw, 20px);
+            margin-bottom: 28px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        .login-page .welcome-text strong {
+            color: #f0d080;
+            font-weight: 600;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .login-form label {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            font-weight: 400;
+        }
+        .login-form input {
+            padding: 16px 20px;
+            border-radius: 60px;
+            border: 1.5px solid rgba(255, 215, 100, 0.25);
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            font-size: 17px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            width: 100%;
+        }
+        .login-form input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+            font-weight: 300;
+        }
+        .login-form input:focus {
+            border-color: #f0d080;
+            box-shadow: 0 0 0 4px rgba(240, 208, 128, 0.12);
+        }
+        .login-form .error-msg {
+            color: #ff8a80;
+            font-size: 14px;
+            min-height: 24px;
+            text-align: center;
+        }
+
+        .btn-primary {
+            padding: 16px 28px;
+            border-radius: 60px;
+            border: none;
+            background: linear-gradient(135deg, #f0d080, #d4a543);
+            color: #1a0a2e;
+            font-size: 19px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s, background 0.3s;
+            box-shadow: 0 6px 24px rgba(212, 165, 67, 0.25);
+            letter-spacing: 1px;
+            width: 100%;
+            margin-top: 4px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 32px rgba(212, 165, 67, 0.35);
+            background: linear-gradient(135deg, #f7df94, #dbb84a);
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ===== 游戏页面 ===== */
+        .game-page {
+            padding: 2px 0;
+        }
+
+        /* 顶部游戏信息栏 */
+        .game-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 14px;
+            margin-bottom: 18px;
+            padding: 0 2px;
+        }
+        .game-top-bar .progress-info {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: clamp(14px, 2.4vw, 18px);
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+        .game-top-bar .progress-info strong {
+            color: #f0d080;
+            font-weight: 600;
+        }
+        .game-top-bar .timer-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 6px 16px 6px 14px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 215, 100, 0.15);
+        }
+        .game-top-bar .timer-box .timer-icon {
+            font-size: 20px;
+        }
+        .game-top-bar .timer-box .timer-number {
+            font-size: clamp(20px, 3.2vw, 28px);
+            font-weight: 700;
+            color: #ffd966;
+            min-width: 44px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.5px;
+        }
+        .game-top-bar .timer-box .timer-number.warning {
+            color: #ff8a80;
+            animation: pulse 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.6;
+                transform: scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.04);
+            }
+        }
+
+        /* 进度条 */
+        .progress-bar-wrap {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            margin-bottom: 22px;
+            overflow: hidden;
+        }
+        .progress-bar-wrap .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f0d080, #d4a543);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* 题目卡片 */
+        .question-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 24px 22px 18px;
+            border: 1px solid rgba(255, 215, 100, 0.08);
+            margin-bottom: 10px;
+        }
+        .question-card .q-number {
+            display: inline-block;
+            background: rgba(240, 208, 128, 0.15);
+            color: #f0d080;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 2px 14px;
+            border-radius: 30px;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .question-card .q-text {
+            color: #fff;
+            font-size: clamp(17px, 3vw, 22px);
+            font-weight: 500;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+        }
+
+        /* 选项 */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .options-list .option-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: 1.5px solid rgba(255, 255, 255, 0.10);
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.88);
+            font-size: clamp(15px, 2.4vw, 18px);
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1.5;
+            letter-spacing: 0.2px;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+        .options-list .option-btn:hover:not(.disabled) {
+            background: rgba(255, 215, 100, 0.08);
+            border-color: rgba(255, 215, 100, 0.25);
+            transform: translateX(4px);
+        }
+        .options-list .option-btn:active:not(.disabled) {
+            transform: scale(0.98);
+        }
+        .options-list .option-btn .opt-label {
+            font-weight: 600;
+            color: #f0d080;
+            margin-right: 8px;
+        }
+        .options-list .option-btn.correct {
+            background: rgba(76, 175, 80, 0.25);
+            border-color: #4CAF50;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.08);
+        }
+        .options-list .option-btn.correct .opt-label {
+            color: #81C784;
+        }
+        .options-list .option-btn.wrong {
+            background: rgba(244, 67, 54, 0.20);
+            border-color: #f44336;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(244, 67, 54, 0.06);
+        }
+        .options-list .option-btn.wrong .opt-label {
+            color: #ef9a9a;
+        }
+        .options-list .option-btn.show-correct {
+            background: rgba(76, 175, 80, 0.18);
+            border-color: rgba(76, 175, 80, 0.4);
+        }
+        .options-list .option-btn.disabled {
+            cursor: default;
+            opacity: 0.65;
+        }
+        .options-list .option-btn.disabled:hover {
+            transform: none;
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.10);
+        }
+
+        /* 反馈区域 */
+        .feedback-area {
+            margin-top: 18px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: clamp(16px, 2.6vw, 20px);
+            font-weight: 500;
+            padding: 0 4px;
+            flex-wrap: wrap;
+        }
+        .feedback-area .fb-icon {
+            font-size: 26px;
+        }
+        .feedback-area .fb-text {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .feedback-area .fb-text.correct-text {
+            color: #81C784;
+        }
+        .feedback-area .fb-text.wrong-text {
+            color: #ef9a9a;
+        }
+        .feedback-area .fb-text.timeout-text {
+            color: #ffb74d;
+        }
+        .feedback-area .fb-answer {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 0.85em;
+            font-weight: 400;
+        }
+
+        /* ===== 结果页面 ===== */
+        .result-page {
+            padding: 4px 2px 10px;
+        }
+
+        .result-hero {
+            text-align: center;
+            padding: 20px 0 16px;
+        }
+        .result-hero .rank-icon {
+            font-size: 68px;
+            line-height: 1.2;
+        }
+        .result-hero .rank-title {
+            font-size: clamp(28px, 5.6vw, 40px);
+            font-weight: 700;
+            color: #f0d080;
+            margin-top: 4px;
+            text-shadow: 0 0 30px rgba(240, 208, 128, 0.15);
+        }
+        .result-hero .rank-sub {
+            font-size: clamp(15px, 2.6vw, 20px);
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 2px;
+            font-weight: 300;
+        }
+        .result-hero .score-badge {
+            display: inline-block;
+            margin-top: 12px;
+            background: rgba(240, 208, 128, 0.12);
+            padding: 6px 28px;
+            border-radius: 60px;
+            border: 1px solid rgba(240, 208, 128, 0.2);
+            color: #fff;
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 600;
+        }
+        .result-hero .score-badge strong {
+            color: #f0d080;
+        }
+
+        /* 题目回顾列表 */
+        .review-list {
+            margin-top: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .review-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .review-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+        }
+        .review-list::-webkit-scrollbar-thumb {
+            background: rgba(240, 208, 128, 0.3);
+            border-radius: 10px;
+        }
+
+        .review-item {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 16px 18px;
+            border-left: 4px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.2s;
+        }
+        .review-item.is-correct {
+            border-left-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+        .review-item.is-wrong {
+            border-left-color: #f44336;
+            background: rgba(244, 67, 54, 0.05);
+        }
+        .review-item .ri-q {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: clamp(14px, 2.2vw, 17px);
+            font-weight: 500;
+            line-height: 1.6;
+        }
+        .review-item .ri-detail {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 18px;
+            margin-top: 6px;
+            font-size: clamp(13px, 2vw, 15px);
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .review-item .ri-detail .ri-your {
+            color: rgba(255, 255, 255, 0.55);
+        }
+        .review-item .ri-detail .ri-correct {
+            color: #81C784;
+        }
+        .review-item .ri-detail .ri-wrong-answer {
+            color: #ef9a9a;
+        }
+        .review-item .ri-status {
+            font-weight: 600;
+            font-size: clamp(13px, 2vw, 15px);
+        }
+        .review-item .ri-status.status-correct {
+            color: #81C784;
+        }
+        .review-item .ri-status.status-wrong {
+            color: #ef9a9a;
+        }
+        .review-item .ri-status.status-timeout {
+            color: #ffb74d;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 26px;
+            flex-wrap: wrap;
+        }
+        .result-actions .btn-primary {
+            flex: 1;
+            min-width: 140px;
+            margin-top: 0;
+        }
+        .result-actions .btn-secondary {
+            flex: 1;
+            min-width: 140px;
+            padding: 16px 28px;
+            border-radius: 60px;
+            border: 1.5px solid rgba(255, 215, 100, 0.25);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 17px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .result-actions .btn-secondary:hover {
+            background: rgba(255, 215, 100, 0.06);
+            border-color: rgba(255, 215, 100, 0.4);
+            color: #fff;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 18px 14px 24px;
+                border-radius: 32px;
+            }
+            .question-card {
+                padding: 18px 16px 14px;
+            }
+            .options-list .option-btn {
+                padding: 12px 16px;
+                font-size: 15px;
+            }
+            .login-form input {
+                padding: 14px 18px;
+                font-size: 16px;
+            }
+            .btn-primary {
+                padding: 14px 20px;
+                font-size: 17px;
+            }
+            .game-top-bar {
+                gap: 6px 10px;
+            }
+            .game-top-bar .timer-box {
+                padding: 4px 12px 4px 10px;
+            }
+            .result-actions {
+                flex-direction: column;
+            }
+            .result-actions .btn-primary,
+            .result-actions .btn-secondary {
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+            .review-item {
+                padding: 14px 14px;
+            }
+            .theme-header .main-title {
+                font-size: 17px;
+            }
+            .theme-header .sub-title {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .game-container {
+                padding: 14px 10px 18px;
+            }
+            .question-card .q-text {
+                font-size: 16px;
+            }
+            .options-list .option-btn {
+                font-size: 14px;
+                padding: 10px 14px;
+            }
+            .game-top-bar .timer-box .timer-number {
+                font-size: 22px;
+                min-width: 36px;
+            }
+        }
+
+        /* ===== 工具类 ===== */
+        .text-center {
+            text-align: center;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-16 {
+            margin-top: 16px;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container" id="app">
+        <!-- ===== 顶部主题横幅 (所有页面共用) ===== -->
+        <header class="theme-header">
+            <div class="main-title">
+                🎵 2026年南执高一音乐生乐理命题大赛
+            </div>
+            <div class="sub-title">
+                《音及音律》 <span class="prophet">命题人：马子慧</span>
+            </div>
+        </header>
+
+        <!-- ===== 登录页面 ===== -->
+        <div class="page active" id="loginPage">
+            <div class="login-page">
+                <div class="welcome-icon">🎼</div>
+                <div class="welcome-text">
+                    欢迎来到 <strong>乐理闯关</strong>  ·  共 <strong>5</strong> 题<br>
+                    每题限时 <strong>60</strong> 秒，挑战你的乐理知识！
+                </div>
+                <form class="login-form" id="loginForm" autocomplete="off">
+                    <label for="accountInput">请输入你的账号</label>
+                    <input
+                    type="text"
+                    id="accountInput"
+                    placeholder="例如：20241001"
+                    maxlength="20"
+                    autofocus
+                    required
+                    >
+                    <div class="error-msg" id="loginError"></div>
+                    <button type="submit" class="btn-primary" id="startBtn">🎯 开始闯关</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== 游戏页面 ===== -->
+        <div class="page" id="gamePage">
+            <div class="game-page">
+                <!-- 顶部信息栏 -->
+                <div class="game-top-bar">
+                    <span class="progress-info" id="progressInfo">
+                        第 <strong id="currentQNum">1</strong> / <span id="totalQNum">5</span> 题
+                    </span>
+                    <div class="timer-box">
+                        <span class="timer-icon">⏳</span>
+                        <span class="timer-number" id="timerDisplay">60</span>
+                        <span style="color:rgba(255,255,255,0.3);font-size:14px;">s</span>
+                    </div>
+                </div>
+                <!-- 进度条 -->
+                <div class="progress-bar-wrap">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <!-- 题目卡片 -->
+                <div class="question-card" id="questionCard">
+                    <div class="q-number" id="qNumberTag">第 1 题</div>
+                    <div class="q-text" id="qText">加载题目...</div>
+                    <div class="options-list" id="optionsList"></div>
+                    <div class="feedback-area" id="feedbackArea">
+                        <span class="fb-icon" id="fbIcon">💡</span>
+                        <span class="fb-text" id="fbText">选择选项开始作答</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 结果页面 ===== -->
+        <div class="page" id="resultPage">
+            <div class="result-page">
+                <div class="result-hero" id="resultHero">
+                    <div class="rank-icon" id="rankIcon">🏆</div>
+                    <div class="rank-title" id="rankTitle">乐理大师</div>
+                    <div class="rank-sub" id="rankSub">完美通关！</div>
+                    <div class="score-badge">
+                        得分：<strong id="finalScore">5</strong> / <span id="finalTotal">5</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:12px;color:rgba(255,255,255,0.35);font-size:14px;text-align:center;letter-spacing:0.5px;">
+                    — 题目回顾 —
+                </div>
+
+                <div class="review-list" id="reviewList">
+                    <!-- 由 JS 动态渲染 -->
+                </div>
+
+                <div class="result-actions">
+                    <button class="btn-primary" id="retryBtn">🔄 再来一次</button>
+                    <button class="btn-secondary" id="homeBtn">🏠 回到首页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  数据：5 道乐理题（来自文件）
+        // ================================================================
+        const QUESTION_BANK = [{
+            id: 1,
+            question: '下列选项中，不属于乐音四大基本特性的是（）',
+            options: ['A. 音高', 'B. 音值', 'C. 音律', 'D. 音色'],
+            answer: 2 // 索引 2 => 'C. 音律'
+        }, {
+            id: 2,
+            question: '我国第一位通过精密数理运算完整创立十二平均律理论的明代律学家是（）',
+            options: ['A. 李延年', 'B. 朱载堉', 'C. 嵇康', 'D. 蔡邕'],
+            answer: 1 // 索引 1 => 'B. 朱载堉'
+        }, {
+            id: 3,
+            question: '三种常用律制里，和声协和度最高，最适用于多声部人声合唱的是（）',
+            options: ['A. 五度相生律', 'B. 十二平均律', 'C. 纯律', 'D. 自然半音律'],
+            answer: 2 // 索引 2 => 'C. 纯律'
+        }, {
+            id: 4,
+            question: '关于十二平均律的特点，表述正确的是（）',
+            options: [
+                'A. 半音间距不等，转调存在明显偏差',
+                'B. 八度均分为12个相等半音，转调灵活自由',
+                'C. 旋律音程最为自然，仅用于弦乐独奏',
+                'D. 三和弦和声最纯净，多用于无伴奏合唱'
+            ],
+            answer: 1 // 索引 1 => 'B. ...'
+        }, {
+            id: 5,
+            question: '乐音体系中，相邻两个基本音级之间为全音关系的一组是（）',
+            options: ['A. E与F', 'B. B与C', 'C. C与D', 'D. #B与C'],
+            answer: 2 // 索引 2 => 'C. C与D'
+        }];
+
+        // ================================================================
+        //  游戏状态
+        // ================================================================
+        const state = {
+            // 打乱后的题目列表 (每项包含原题 + 用户作答信息)
+            questions: [],
+            // 当前题目索引 (0-based)
+            currentIndex: 0,
+            // 是否正在作答 (防止重复点击)
+            isAnswering: false,
+            // 计时器句柄
+            timerHandle: null,
+            // 剩余秒数
+            timeLeft: 60,
+            // 用户账号
+            account: '',
+            // 是否已完成全部题目
+            isFinished: false,
+            // 每题记录: { selectedIndex, isCorrect, isTimeout, correctIndex }
+            records: [],
+        };
+
+        // ================================================================
+        //  DOM 引用
+        // ================================================================
+        const $ = (id) => document.getElementById(id);
+        const loginPage = $('loginPage');
+        const gamePage = $('gamePage');
+        const resultPage = $('resultPage');
+        const accountInput = $('accountInput');
+        const loginError = $('loginError');
+        const loginForm = $('loginForm');
+        const startBtn = $('startBtn');
+
+        const progressInfo = $('progressInfo');
+        const currentQNum = $('currentQNum');
+        const totalQNum = $('totalQNum');
+        const timerDisplay = $('timerDisplay');
+        const progressFill = $('progressFill');
+        const qNumberTag = $('qNumberTag');
+        const qText = $('qText');
+        const optionsList = $('optionsList');
+        const feedbackArea = $('feedbackArea');
+        const fbIcon = $('fbIcon');
+        const fbText = $('fbText');
+
+        const resultHero = $('resultHero');
+        const rankIcon = $('rankIcon');
+        const rankTitle = $('rankTitle');
+        const rankSub = $('rankSub');
+        const finalScore = $('finalScore');
+        const finalTotal = $('finalTotal');
+        const reviewList = $('reviewList');
+        const retryBtn = $('retryBtn');
+        const homeBtn = $('homeBtn');
+
+        // ================================================================
+        //  工具函数
+        // ================================================================
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function getOptionLabel(index) {
+            return String.fromCharCode(65 + index); // A, B, C, D
+        }
+
+        function formatOptionText(optionStr) {
+            // 如果已经包含 A. B. 等前缀则直接返回，否则添加
+            if (/^[A-D]\.\s/.test(optionStr)) return optionStr;
+            return optionStr;
+        }
+
+        // 根据正确率返回称号
+        function getRank(score, total) {
+            const ratio = score / total;
+            if (ratio === 1) return { icon: '🏆', title: '乐理大师', sub: '完美通关，登峰造极！' };
+            if (ratio >= 0.8) return { icon: '🌟', title: '乐理高手', sub: '功底扎实，继续精进！' };
+            if (ratio >= 0.6) return { icon: '📚', title: '乐理学徒', sub: '初窥门径，未来可期！' };
+            if (ratio >= 0.4) return { icon: '🎵', title: '乐理入门', sub: '勤加练习，定能进步！' };
+            return { icon: '📖', title: '乐理初学者', sub: '从头开始，夯实基础！' };
+        }
+
+        // ================================================================
+        //  页面切换
+        // ================================================================
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById(pageId);
+            if (target) target.classList.add('active');
+            // 重新触发动画
+            target.style.animation = 'none';
+            requestAnimationFrame(() => {
+                target.style.animation = '';
+            });
+        }
+
+        // ================================================================
+        //  登录逻辑
+        // ================================================================
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const account = accountInput.value.trim();
+            if (!account) {
+                loginError.textContent = '⚠️ 请输入你的账号';
+                accountInput.focus();
+                return;
+            }
+            loginError.textContent = '';
+            state.account = account;
+            startGame();
+        });
+
+        // ================================================================
+        //  游戏核心逻辑
+        // ================================================================
+        function startGame() {
+            // 重置状态
+            state.isFinished = false;
+            state.currentIndex = 0;
+            state.records = [];
+            state.isAnswering = false;
+            if (state.timerHandle) {
+                clearInterval(state.timerHandle);
+                state.timerHandle = null;
+            }
+
+            // 打乱题目
+            const shuffled = shuffle(QUESTION_BANK);
+            state.questions = shuffled.map((q, idx) => ({
+                ...q,
+                // 保留原始id用于追踪，但顺序已打乱
+                _order: idx,
+                // 用户作答记录
+                userSelected: null, // 索引
+                isCorrect: false,
+                isTimeout: false,
+                correctIndex: q.answer,
+            }));
+
+            totalQNum.textContent = state.questions.length;
+            showPage('gamePage');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qs = state.questions;
+            const idx = state.currentIndex;
+
+            if (idx >= qs.length) {
+                finishGame();
+                return;
+            }
+
+            const q = qs[idx];
+            // 更新进度
+            currentQNum.textContent = idx + 1;
+            progressFill.style.width = ((idx / qs.length) * 100) + '%';
+            qNumberTag.textContent = `第 ${idx + 1} 题`;
+
+            // 题目文字
+            qText.textContent = q.question;
+
+            // 渲染选项
+            optionsList.innerHTML = '';
+            q.options.forEach((opt, optIdx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.dataset.index = optIdx;
+                const label = getOptionLabel(optIdx);
+                // 如果选项文字已经包含 A. 等前缀，则直接显示，否则添加
+                const displayText = opt;
+                btn.innerHTML = `<span class="opt-label">${label}.</span> ${displayText.replace(/^[A-D]\.\s*/, '')}`;
+                btn.addEventListener('click', () => handleOptionClick(optIdx));
+                optionsList.appendChild(btn);
+            });
+
+            // 重置反馈
+            fbIcon.textContent = '💡';
+            fbText.textContent = '选择选项开始作答';
+            fbText.className = 'fb-text';
+
+            // 启用所有选项 (移除disabled状态)
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('disabled', 'correct', 'wrong', 'show-correct');
+                btn.disabled = false;
+            });
+
+            state.isAnswering = false;
+
+            // 启动计时器
+            startTimer();
+        }
+
+        // ================================================================
+        //  计时器
+        // ================================================================
+        function startTimer() {
+            if (state.timerHandle) {
+                clearInterval(state.timerHandle);
+                state.timerHandle = null;
+            }
+            state.timeLeft = 60;
+            updateTimerDisplay();
+
+            state.timerHandle = setInterval(() => {
+                state.timeLeft -= 1;
+                updateTimerDisplay();
+
+                if (state.timeLeft <= 10) {
+                    timerDisplay.classList.add('warning');
+                } else {
+                    timerDisplay.classList.remove('warning');
+                }
+
+                if (state.timeLeft <= 0) {
+                    clearInterval(state.timerHandle);
+                    state.timerHandle = null;
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            timerDisplay.textContent = Math.max(0, state.timeLeft);
+        }
+
+        function stopTimer() {
+            if (state.timerHandle) {
+                clearInterval(state.timerHandle);
+                state.timerHandle = null;
+            }
+            timerDisplay.classList.remove('warning');
+        }
+
+        // ================================================================
+        //  超时处理
+        // ================================================================
+        function handleTimeout() {
+            if (state.isAnswering) return;
+            state.isAnswering = true;
+
+            const idx = state.currentIndex;
+            const q = state.questions[idx];
+            const correctIdx = q.answer;
+
+            // 记录超时
+            q.isTimeout = true;
+            q.isCorrect = false;
+            q.userSelected = null;
+
+            // 显示超时反馈
+            fbIcon.textContent = '⏰';
+            fbText.textContent = '时间到！';
+            fbText.className = 'fb-text timeout-text';
+
+            // 高亮正确答案
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach((btn, i) => {
+                btn.classList.add('disabled');
+                btn.disabled = true;
+                if (i === correctIdx) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            // 显示正确答案
+            const correctLabel = getOptionLabel(correctIdx);
+            const correctText = q.options[correctIdx].replace(/^[A-D]\.\s*/, '');
+            fbText.textContent += ` 正确答案是 ${correctLabel}. ${correctText}`;
+
+            state.records.push({
+                questionId: q.id,
+                selectedIndex: null,
+                isCorrect: false,
+                isTimeout: true,
+                correctIndex: correctIdx,
+            });
+
+            // 延迟进入下一题
+            setTimeout(() => {
+                state.currentIndex += 1;
+                renderQuestion();
+            }, 1800);
+        }
+
+        // ================================================================
+        //  选项点击
+        // ================================================================
+        function handleOptionClick(selectedIdx) {
+            if (state.isAnswering) return;
+            const idx = state.currentIndex;
+            const q = state.questions[idx];
+            if (!q) return;
+
+            // 防止重复点击
+            state.isAnswering = true;
+            stopTimer();
+
+            const correctIdx = q.answer;
+            const isCorrect = (selectedIdx === correctIdx);
+
+            // 记录
+            q.userSelected = selectedIdx;
+            q.isCorrect = isCorrect;
+            q.isTimeout = false;
+
+            state.records.push({
+                questionId: q.id,
+                selectedIndex: selectedIdx,
+                isCorrect: isCorrect,
+                isTimeout: false,
+                correctIndex: correctIdx,
+            });
+
+            // 禁用所有选项
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach((btn, i) => {
+                btn.classList.add('disabled');
+                btn.disabled = true;
+                if (i === correctIdx) {
+                    btn.classList.add('correct');
+                }
+                if (i === selectedIdx && !isCorrect) {
+                    btn.classList.add('wrong');
+                }
+                if (i === selectedIdx && isCorrect) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            // 反馈信息
+            const correctLabel = getOptionLabel(correctIdx);
+            const correctText = q.options[correctIdx].replace(/^[A-D]\.\s*/, '');
+            if (isCorrect) {
+                fbIcon.textContent = '✅';
+                fbText.textContent = `正确！ 太棒了！`;
+                fbText.className = 'fb-text correct-text';
+            } else {
+                fbIcon.textContent = '❌';
+                fbText.textContent = `错误！ 正确答案是 ${correctLabel}. ${correctText}`;
+                fbText.className = 'fb-text wrong-text';
+            }
+
+            // 延迟进入下一题
+            setTimeout(() => {
+                state.currentIndex += 1;
+                renderQuestion();
+            }, 1500);
+        }
+
+        // ================================================================
+        //  完成游戏 → 展示结果
+        // ================================================================
+        function finishGame() {
+            state.isFinished = true;
+            stopTimer();
+
+            const qs = state.questions;
+            const total = qs.length;
+            const correctCount = qs.filter(q => q.isCorrect === true).length;
+
+            // 渲染结果
+            finalScore.textContent = correctCount;
+            finalTotal.textContent = total;
+
+            const rank = getRank(correctCount, total);
+            rankIcon.textContent = rank.icon;
+            rankTitle.textContent = rank.title;
+            rankSub.textContent = rank.sub;
+
+            // 渲染题目回顾
+            reviewList.innerHTML = '';
+            qs.forEach((q, idx) => {
+                const item = document.createElement('div');
+                const isCorrect = q.isCorrect;
+                const isTimeout = q.isTimeout;
+                const userSel = q.userSelected;
+                const correctIdx = q.answer;
+
+                let statusText = '';
+                let statusClass = '';
+                let userDisplay = '未作答';
+                let userClass = '';
+
+                if (isTimeout) {
+                    statusText = '⏰ 超时';
+                    statusClass = 'status-timeout';
+                    userDisplay = '未作答';
+                    userClass = 'ri-wrong-answer';
+                } else if (isCorrect) {
+                    statusText = '✅ 正确';
+                    statusClass = 'status-correct';
+                    userDisplay = getOptionLabel(userSel) + '. ' + q.options[userSel].replace(/^[A-D]\.\s*/, '');
+                    userClass = '';
+                } else {
+                    statusText = '❌ 错误';
+                    statusClass = 'status-wrong';
+                    userDisplay = getOptionLabel(userSel) + '. ' + q.options[userSel].replace(/^[A-D]\.\s*/, '');
+                    userClass = 'ri-wrong-answer';
+                }
+
+                const correctDisplay = getOptionLabel(correctIdx) + '. ' + q.options[correctIdx].replace(/^[A-D]\.\s*/,
+                '');
+
+                item.className = `review-item ${isCorrect ? 'is-correct' : 'is-wrong'}`;
+                item.innerHTML = `
+                    <div class="ri-q">${idx+1}. ${q.question}</div>
+                    <div class="ri-detail">
+                        <span class="${userClass}">你的答案：${userDisplay}</span>
+                        <span class="ri-correct">正确答案：${correctDisplay}</span>
+                        <span class="ri-status ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+                reviewList.appendChild(item);
+            });
+
+            showPage('resultPage');
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ================================================================
+        //  结果页按钮
+        // ================================================================
+        retryBtn.addEventListener('click', function() {
+            // 直接重新开始 (保留账号)
+            startGame();
+        });
+
+        homeBtn.addEventListener('click', function() {
+            // 回到登录页
+            if (state.timerHandle) {
+                clearInterval(state.timerHandle);
+                state.timerHandle = null;
+            }
+            showPage('loginPage');
+            accountInput.value = state.account || '';
+            loginError.textContent = '';
+            // 重置一些状态
+            state.isFinished = false;
+            state.currentIndex = 0;
+            state.questions = [];
+            state.records = [];
+            progressFill.style.width = '0%';
+        });
+
+        // ================================================================
+        //  键盘支持 & 自动聚焦
+        // ================================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // 如果登录页可见，聚焦输入框
+            if (loginPage.classList.contains('active')) {
+                accountInput.focus();
+            }
+            // 回车键支持 (已在form中处理)
+        });
+
+        // 当切换到游戏页时，聚焦到第一个选项 (辅助)
+        // 但选项点击已经通过事件绑定处理
+
+        // ================================================================
+        //  初始化：显示登录页
+        // ================================================================
+        showPage('loginPage');
+        accountInput.focus();
+
+        console.log('🎵 乐理闯关游戏已加载！命题人：马子慧');
+    </script>
+
+</body>
+</html>
