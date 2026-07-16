@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>乐理闯关大赛</title>
+    <style>
+        /* ===== 全局样式 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(145deg, #1a0e2e 0%, #2d1b4e 40%, #1f113a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            margin: 0;
+        }
+
+        /* 主容器 */
+        .app-container {
+            width: 100%;
+            max-width: 780px;
+            background: rgba(255, 248, 235, 0.07);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 48px 48px 32px 32px;
+            padding: 24px 20px 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 215, 0, 0.15) inset;
+            border: 1px solid rgba(255, 215, 0, 0.12);
+            transition: all 0.3s;
+        }
+
+        /* ===== 通用标题区 ===== */
+        .main-header {
+            text-align: center;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed rgba(255, 215, 0, 0.25);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .main-header .contest-title {
+            font-size: clamp(16px, 4vw, 24px);
+            font-weight: 700;
+            color: #f7e8b0;
+            text-shadow: 0 2px 12px rgba(255, 215, 0, 0.25);
+            letter-spacing: 2px;
+            line-height: 1.5;
+        }
+
+        .main-header .contest-title .highlight {
+            color: #ffd866;
+            background: linear-gradient(135deg, #f9d976, #f39c12);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-header .contest-sub {
+            font-size: clamp(12px, 2.2vw, 16px);
+            color: #cdb8e6;
+            margin-top: 4px;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .main-header .deco-note {
+            font-size: 28px;
+            display: inline-block;
+            margin: 0 8px;
+            animation: floatNote 3s ease-in-out infinite;
+            opacity: 0.6;
+        }
+        .main-header .deco-note:nth-child(2) {
+            animation-delay: 0.8s;
+        }
+        .main-header .deco-note:nth-child(3) {
+            animation-delay: 1.6s;
+        }
+
+        @keyframes floatNote {
+            0%,
+            100% {
+                transform: translateY(0) rotate(-3deg);
+            }
+            50% {
+                transform: translateY(-6px) rotate(3deg);
+            }
+        }
+
+        /* ===== 登录页 ===== */
+        .page-login {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0 12px;
+        }
+
+        .page-login .login-greeting {
+            font-size: clamp(18px, 4vw, 28px);
+            color: #efe6ff;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .page-login .login-hint {
+            color: #b8a5d4;
+            font-size: clamp(13px, 2.2vw, 16px);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .login-input-group {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .login-input-group label {
+            color: #d4c6ed;
+            font-weight: 500;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .login-input-group input {
+            padding: 16px 20px;
+            border-radius: 60px;
+            border: 2px solid rgba(255, 215, 0, 0.25);
+            background: rgba(255, 255, 255, 0.07);
+            color: #f5eeff;
+            font-size: 17px;
+            outline: none;
+            transition: all 0.3s;
+            width: 100%;
+            backdrop-filter: blur(4px);
+        }
+
+        .login-input-group input::placeholder {
+            color: #8f7aaa;
+        }
+
+        .login-input-group input:focus {
+            border-color: #f7c948;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.12);
+        }
+
+        .btn-primary {
+            padding: 16px 32px;
+            border-radius: 60px;
+            border: none;
+            background: linear-gradient(135deg, #f7d875, #e8b82a);
+            color: #1f113a;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 24px rgba(255, 215, 0, 0.25);
+            letter-spacing: 2px;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 10px 32px rgba(255, 215, 0, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            padding: 14px 28px;
+            border-radius: 60px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            background: transparent;
+            color: #f7e8b0;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 215, 0, 0.12);
+            border-color: #f7c948;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.97);
+        }
+
+        /* ===== 游戏页 ===== */
+        .page-game {
+            display: none;
+            flex-direction: column;
+        }
+
+        .game-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .game-level {
+            font-size: clamp(14px, 2.6vw, 20px);
+            color: #ffd866;
+            font-weight: 700;
+            background: rgba(255, 215, 0, 0.10);
+            padding: 4px 16px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+        }
+
+        .game-timer {
+            font-size: clamp(18px, 3vw, 28px);
+            font-weight: 700;
+            color: #f5eeff;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 18px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 80px;
+            justify-content: center;
+        }
+
+        .game-timer.warning {
+            color: #ff7b7b;
+            animation: pulse 0.7s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.6;
+                transform: scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.04);
+            }
+        }
+
+        .game-progress-wrap {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 8px 0 16px;
+        }
+
+        .game-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #f7d875, #f5b342);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+            box-shadow: 0 0 16px rgba(255, 215, 0, 0.2);
+        }
+
+        .question-card {
+            background: rgba(255, 248, 240, 0.06);
+            border-radius: 28px;
+            padding: 24px 20px 20px;
+            border: 1px solid rgba(255, 215, 0, 0.08);
+            backdrop-filter: blur(4px);
+            margin-bottom: 16px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-text {
+            font-size: clamp(16px, 3.2vw, 22px);
+            color: #f5eeff;
+            line-height: 1.7;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option-btn {
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.10);
+            background: rgba(255, 255, 255, 0.04);
+            color: #e8ddf5;
+            font-size: clamp(14px, 2.2vw, 17px);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            background: rgba(255, 215, 0, 0.08);
+            border-color: rgba(255, 215, 0, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .option-btn:active:not(.disabled) {
+            transform: scale(0.97);
+        }
+
+        .option-btn .option-label {
+            font-weight: 700;
+            color: #ffd866;
+            min-width: 24px;
+        }
+
+        .option-btn.correct {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.18);
+            color: #b9f6ca;
+        }
+
+        .option-btn.wrong {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.18);
+            color: #ffcdd2;
+        }
+
+        .option-btn.disabled {
+            cursor: default;
+            opacity: 0.6;
+        }
+
+        .option-btn.show-correct {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.12);
+        }
+
+        .feedback-area {
+            margin-top: 16px;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: clamp(15px, 2.4vw, 18px);
+            font-weight: 600;
+            text-align: center;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .feedback-area.feedback-correct {
+            background: rgba(76, 175, 80, 0.15);
+            color: #b9f6ca;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .feedback-area.feedback-wrong {
+            background: rgba(244, 67, 54, 0.15);
+            color: #ffcdd2;
+            border: 1px solid rgba(244, 67, 54, 0.2);
+        }
+
+        .feedback-area.feedback-timeout {
+            background: rgba(255, 193, 7, 0.12);
+            color: #ffe082;
+            border: 1px solid rgba(255, 193, 7, 0.15);
+        }
+
+        /* ===== 结果页 ===== */
+        .page-result {
+            display: none;
+            flex-direction: column;
+        }
+
+        .result-summary {
+            text-align: center;
+            padding: 12px 0 18px;
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.08);
+        }
+
+        .result-score {
+            font-size: clamp(40px, 8vw, 64px);
+            font-weight: 800;
+            color: #ffd866;
+            line-height: 1.2;
+        }
+
+        .result-score .score-total {
+            font-size: 28px;
+            color: #b8a5d4;
+            font-weight: 500;
+        }
+
+        .result-label {
+            color: #cdb8e6;
+            font-size: 16px;
+            margin-top: 4px;
+        }
+
+        .result-account {
+            color: #b8a5d4;
+            font-size: 15px;
+            margin-top: 4px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 12px 0 20px;
+        }
+
+        .result-actions .btn-primary,
+        .result-actions .btn-secondary {
+            flex: 1;
+            min-width: 140px;
+            max-width: 220px;
+        }
+
+        /* 题目回顾 */
+        .review-section {
+            margin-top: 8px;
+        }
+
+        .review-title {
+            color: #d4c6ed;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .review-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            border-left: 4px solid rgba(255, 215, 0, 0.15);
+        }
+
+        .review-item .r-question {
+            color: #e8ddf5;
+            font-size: clamp(14px, 2.2vw, 17px);
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .review-item .r-answer {
+            font-size: clamp(13px, 2vw, 15px);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            margin-top: 4px;
+        }
+
+        .review-item .r-answer .r-user {
+            color: #b8a5d4;
+        }
+        .review-item .r-answer .r-correct {
+            color: #81c784;
+        }
+        .review-item .r-answer .r-wrong {
+            color: #ef9a9a;
+        }
+        .review-item .r-status {
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        .review-item .r-status.ok {
+            color: #81c784;
+        }
+        .review-item .r-status.fail {
+            color: #ef9a9a;
+        }
+
+        /* ===== 排行榜 ===== */
+        .rank-section {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 16px 16px 8px;
+            border: 1px solid rgba(255, 215, 0, 0.06);
+        }
+
+        .rank-title {
+            color: #ffd866;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .rank-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .rank-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: clamp(13px, 2vw, 16px);
+            color: #d4c6ed;
+        }
+
+        .rank-table th {
+            text-align: left;
+            padding: 10px 8px 8px 0;
+            color: #b8a5d4;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: clamp(12px, 1.8vw, 15px);
+        }
+
+        .rank-table td {
+            padding: 10px 8px 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .rank-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .rank-table .rank-num {
+            color: #ffd866;
+            font-weight: 700;
+            min-width: 32px;
+        }
+        .rank-table .rank-account {
+            font-weight: 500;
+            color: #f5eeff;
+        }
+        .rank-table .rank-score {
+            color: #ffd866;
+            font-weight: 600;
+        }
+        .rank-table .rank-time {
+            color: #8f7aaa;
+            font-size: 0.85em;
+        }
+
+        .rank-empty {
+            color: #8f7aaa;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 15px;
+        }
+
+        /* ===== 隐藏辅助 ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== 滚动条美化 ===== */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        /* ===== 响应式微调 ===== */
+        @media (max-width: 560px) {
+            .app-container {
+                padding: 16px 14px 24px;
+                border-radius: 32px;
+            }
+            .question-card {
+                padding: 18px 14px 16px;
+            }
+            .option-btn {
+                padding: 12px 14px;
+                font-size: 15px;
+            }
+            .game-top-bar {
+                flex-wrap: wrap;
+            }
+            .result-actions .btn-primary,
+            .result-actions .btn-secondary {
+                min-width: 120px;
+                font-size: 15px;
+                padding: 12px 18px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .app-container {
+                padding: 12px 10px 18px;
+                border-radius: 24px;
+            }
+            .login-input-group input {
+                padding: 14px 16px;
+                font-size: 15px;
+            }
+            .btn-primary {
+                padding: 14px 20px;
+                font-size: 17px;
+            }
+            .option-btn {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+        }
+
+        /* 小工具：防止点击穿透 */
+        .no-click {
+            pointer-events: none;
+        }
+
+        /* 排行榜当前玩家高亮 */
+        .rank-table .highlight-me td {
+            background: rgba(255, 215, 0, 0.06);
+            border-radius: 8px;
+        }
+        .rank-table .highlight-me .rank-account {
+            color: #ffd866;
+        }
+
+        /* 错题标记 */
+        .wrong-mark {
+            color: #ef9a9a;
+            margin-left: 6px;
+        }
+        .correct-mark {
+            color: #81c784;
+            margin-left: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="app">
+
+        <!-- ========== 顶部通用标题 ========== -->
+        <header class="main-header">
+            <div>
+                <span class="deco-note">♩</span>
+                <span class="deco-note">♪</span>
+                <span class="deco-note">♫</span>
+            </div>
+            <div class="contest-title">
+                2026年南执高一音乐生乐理命题大赛<br />
+                <span class="highlight">《音及音律》</span>
+            </div>
+            <div class="contest-sub">命题人：马子慧 &nbsp;·&nbsp; 音律闯关</div>
+        </header>
+
+        <!-- ========== 登录页 ========== -->
+        <div class="page-login" id="pageLogin">
+            <div class="login-greeting">🎵 音乐闯关 · 乐理挑战</div>
+            <div class="login-hint">输入你的姓名或学号，开始闯关吧！</div>
+            <div class="login-input-group">
+                <label for="accountInput">👤 账号 / 姓名</label>
+                <input type="text" id="accountInput" placeholder="例如：张乐怡" maxlength="20" autocomplete="off" />
+                <button class="btn-primary" id="btnStart">🎯 开始闯关</button>
+            </div>
+            <div style="margin-top:16px; color:#8f7aaa; font-size:13px; text-align:center;">
+                ⏱ 每道题限时 10 秒 · 共 5 关
+            </div>
+        </div>
+
+        <!-- ========== 游戏页 ========== -->
+        <div class="page-game" id="pageGame">
+            <div class="game-top-bar">
+                <span class="game-level" id="gameLevel">第 1 / 5 关</span>
+                <span class="game-timer" id="gameTimer">⏱ 10</span>
+            </div>
+            <div class="game-progress-wrap">
+                <div class="game-progress-bar" id="progressBar" style="width:0%;"></div>
+            </div>
+
+            <div class="question-card" id="questionCard">
+                <div class="question-text" id="questionText">加载题目中...</div>
+                <div class="options-grid" id="optionsGrid"></div>
+                <div class="feedback-area" id="feedbackArea">💡 选择你的答案</div>
+            </div>
+        </div>
+
+        <!-- ========== 结果页 ========== -->
+        <div class="page-result" id="pageResult">
+            <div class="result-summary">
+                <div class="result-score">
+                    <span id="resultCorrect">0</span><span class="score-total"> / 5</span>
+                </div>
+                <div class="result-label">🎯 答对题数</div>
+                <div class="result-account" id="resultAccount">玩家：——</div>
+            </div>
+
+            <div class="result-actions">
+                <button class="btn-secondary" id="btnReplay">🔄 再来一次</button>
+                <button class="btn-secondary" id="btnNewPlayer">👤 换人玩</button>
+            </div>
+
+            <!-- 题目回顾 -->
+            <div class="review-section" id="reviewSection">
+                <div class="review-title">📖 全部题目及答案回顾</div>
+                <div id="reviewList"></div>
+            </div>
+
+            <!-- 排行榜 -->
+            <div class="rank-section" id="rankSection">
+                <div class="rank-title">🏆 排行榜</div>
+                <div class="rank-table-wrap">
+                    <table class="rank-table" id="rankTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>玩家</th>
+                                <th>正确</th>
+                                <th>时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankBody"></tbody>
+                    </table>
+                </div>
+                <div id="rankEmpty" class="rank-empty">暂无记录，快来挑战吧！</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* ============================================================
+           题库（来自文档）
+           ============================================================ */
+        const QUESTION_BANK = [{
+            id: 1,
+            text: '下列选项中，不属于乐音四大基本特性的是（）',
+            options: ['音高', '音值', '音律', '音色'],
+            answer: 2 // 索引 0-based: C -> 2
+        }, {
+            id: 2,
+            text: '我国第一位通过精密数理运算完整创立十二平均律理论的明代律学家是（）',
+            options: ['李延年', '朱载堉', '嵇康', '蔡邕'],
+            answer: 1 // B -> 1
+        }, {
+            id: 3,
+            text: '三种常用律制里，和声协和度最高，最适用于多声部人声合唱的是（）',
+            options: ['五度相生律', '十二平均律', '纯律', '自然半音律'],
+            answer: 2 // C -> 2
+        }, {
+            id: 4,
+            text: '关于十二平均律的特点，表述正确的是（）',
+            options: [
+                '半音间距不等，转调存在明显偏差',
+                '八度均分为12个相等半音，转调灵活自由',
+                '旋律音程最为自然，仅用于弦乐独奏',
+                '三和弦和声最纯净，多用于无伴奏合唱'
+            ],
+            answer: 1 // B -> 1
+        }, {
+            id: 5,
+            text: '乐音体系中，相邻两个基本音级之间为全音关系的一组是（）',
+            options: ['E与F', 'B与C', 'C与D', '#B与C'],
+            answer: 2 // C -> 2
+        }];
+
+        const LABELS = ['A', 'B', 'C', 'D'];
+        const TOTAL_QS = QUESTION_BANK.length;
+
+        /* ============================================================
+           状态
+           ============================================================ */
+        let state = {
+            // 当前玩家
+            account: '',
+            // 打乱后的题目（副本）
+            questions: [],
+            // 当前题目索引 (0-based)
+            currentIndex: 0,
+            // 用户答案数组: 每项为 { selected: 0-3 | null, correct: boolean }
+            answers: [],
+            // 计时器句柄
+            timerHandle: null,
+            // 剩余秒数
+            timeLeft: 10,
+            // 是否正在等待反馈（防连点）
+            isWaiting: false,
+            // 游戏是否结束
+            isFinished: false,
+            // 开始时间戳 (用于记录完成时间)
+            startTimestamp: null,
+        };
+
+        /* ============================================================
+           DOM 引用
+           ============================================================ */
+        const $ = (id) => document.getElementById(id);
+        const pageLogin = $('pageLogin');
+        const pageGame = $('pageGame');
+        const pageResult = $('pageResult');
+        const accountInput = $('accountInput');
+        const btnStart = $('btnStart');
+        const gameLevel = $('gameLevel');
+        const gameTimer = $('gameTimer');
+        const progressBar = $('progressBar');
+        const questionText = $('questionText');
+        const optionsGrid = $('optionsGrid');
+        const feedbackArea = $('feedbackArea');
+        const resultCorrect = $('resultCorrect');
+        const resultAccount = $('resultAccount');
+        const reviewList = $('reviewList');
+        const rankBody = $('rankBody');
+        const rankEmpty = $('rankEmpty');
+        const btnReplay = $('btnReplay');
+        const btnNewPlayer = $('btnNewPlayer');
+
+        /* ============================================================
+           工具函数
+           ============================================================ */
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function formatTime(ts) {
+            const d = new Date(ts);
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
+        function getRanking() {
+            try {
+                const raw = localStorage.getItem('music_rank');
+                return raw ? JSON.parse(raw) : [];
+            } catch { return []; }
+        }
+
+        function saveRanking(list) {
+            localStorage.setItem('music_rank', JSON.stringify(list));
+        }
+
+        function addRecord(account, correct, total, timestamp) {
+            const list = getRanking();
+            // 如果已有该账号的旧记录，保留最新的（或可保留多条，这里保留多条以体现多次尝试）
+            // 但用户说 "所有参与游戏的人需要有汇总的游戏记录"，所以保留所有记录
+            list.push({ account, correct, total, timestamp });
+            saveRanking(list);
+        }
+
+        function getSortedRanking() {
+            const list = getRanking();
+            // 按正确数降序，正确数相同按时间戳升序（早的优先）
+            return list.slice().sort((a, b) => {
+                if (b.correct !== a.correct) return b.correct - a.correct;
+                return a.timestamp - b.timestamp;
+            });
+        }
+
+        /* ============================================================
+           页面切换
+           ============================================================ */
+        function showPage(page) {
+            pageLogin.style.display = 'none';
+            pageGame.style.display = 'none';
+            pageResult.style.display = 'none';
+            if (page === 'login') pageLogin.style.display = 'flex';
+            else if (page === 'game') pageGame.style.display = 'flex';
+            else if (page === 'result') pageResult.style.display = 'flex';
+        }
+
+        /* ============================================================
+           游戏核心逻辑
+           ============================================================ */
+
+        // 开始游戏
+        function startGame(account) {
+            if (!account || account.trim() === '') {
+                alert('请先输入你的账号或姓名！');
+                return;
+            }
+            state.account = account.trim();
+            state.questions = shuffle(QUESTION_BANK);
+            state.currentIndex = 0;
+            state.answers = state.questions.map(() => ({ selected: null, correct: false }));
+            state.isFinished = false;
+            state.isWaiting = false;
+            state.startTimestamp = Date.now();
+
+            showPage('game');
+            renderQuestion();
+        }
+
+        // 渲染当前题目
+        function renderQuestion() {
+            if (state.isFinished) return;
+            const idx = state.currentIndex;
+            const q = state.questions[idx];
+            const total = state.questions.length;
+
+            // 更新进度
+            gameLevel.textContent = `第 ${idx + 1} / ${total} 关`;
+            progressBar.style.width = `${((idx) / total) * 100}%`;
+
+            // 题目文本
+            questionText.textContent = q.text;
+
+            // 选项
+            optionsGrid.innerHTML = '';
+            q.options.forEach((opt, oi) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-label">${LABELS[oi]}.</span> ${opt}`;
+                btn.dataset.index = oi;
+                btn.addEventListener('click', () => onOptionClick(oi));
+                optionsGrid.appendChild(btn);
+            });
+
+            // 反馈清空
+            feedbackArea.textContent = '💡 选择你的答案';
+            feedbackArea.className = 'feedback-area';
+            // 移除禁用状态
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('disabled', 'correct', 'wrong', 'show-correct'));
+
+            // 启动计时器
+            startTimer();
+
+            // 如果有已选答案（恢复状态，一般不会）
+            const ans = state.answers[idx];
+            if (ans.selected !== null) {
+                // 如果已经选过，恢复显示（但实际流程中不会发生）
+            }
+        }
+
+        // 启动计时器
+        function startTimer() {
+            stopTimer();
+            state.timeLeft = 10;
+            gameTimer.textContent = `⏱ ${state.timeLeft}`;
+            gameTimer.classList.remove('warning');
+
+            state.timerHandle = setInterval(() => {
+                state.timeLeft -= 1;
+                gameTimer.textContent = `⏱ ${state.timeLeft}`;
+                if (state.timeLeft <= 3) {
+                    gameTimer.classList.add('warning');
+                }
+                if (state.timeLeft <= 0) {
+                    // 超时
+                    clearInterval(state.timerHandle);
+                    state.timerHandle = null;
+                    gameTimer.textContent = '⏱ 0';
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (state.timerHandle) {
+                clearInterval(state.timerHandle);
+                state.timerHandle = null;
+            }
+            gameTimer.classList.remove('warning');
+        }
+
+        // 超时处理
+        function handleTimeout() {
+            if (state.isWaiting || state.isFinished) return;
+            const idx = state.currentIndex;
+            const ans = state.answers[idx];
+            if (ans.selected !== null) return; // 已经选过
+
+            // 标记为错误
+            ans.selected = null;
+            ans.correct = false;
+
+            // 禁用所有选项
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+
+            // 显示正确答案
+            const q = state.questions[idx];
+            const correctIdx = q.answer;
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach((b, i) => {
+                if (i === correctIdx) b.classList.add('show-correct');
+            });
+
+            feedbackArea.textContent = `⏰ 时间到！正确答案是 ${LABELS[correctIdx]}`;
+            feedbackArea.className = 'feedback-area feedback-timeout';
+
+            state.isWaiting = true;
+            setTimeout(() => {
+                state.isWaiting = false;
+                nextQuestion();
+            }, 1600);
+        }
+
+        // 点击选项
+        function onOptionClick(selectedIdx) {
+            if (state.isWaiting || state.isFinished) return;
+            const idx = state.currentIndex;
+            const ans = state.answers[idx];
+            if (ans.selected !== null) return; // 已选
+
+            // 停止计时器
+            stopTimer();
+
+            const q = state.questions[idx];
+            const correct = selectedIdx === q.answer;
+            ans.selected = selectedIdx;
+            ans.correct = correct;
+
+            // 禁用所有选项
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(b => b.classList.add('disabled'));
+
+            // 高亮正确/错误
+            btns.forEach((b, i) => {
+                if (i === q.answer) b.classList.add('show-correct');
+                if (i === selectedIdx) {
+                    if (correct) b.classList.add('correct');
+                    else b.classList.add('wrong');
+                }
+            });
+
+            // 反馈
+            if (correct) {
+                feedbackArea.textContent = '✅ 正确！太棒了！ 🎉';
+                feedbackArea.className = 'feedback-area feedback-correct';
+            } else {
+                feedbackArea.textContent = `❌ 错误，正确答案是 ${LABELS[q.answer]}`;
+                feedbackArea.className = 'feedback-area feedback-wrong';
+            }
+
+            state.isWaiting = true;
+            setTimeout(() => {
+                state.isWaiting = false;
+                nextQuestion();
+            }, 1400);
+        }
+
+        // 下一题 或 结束
+        function nextQuestion() {
+            if (state.isFinished) return;
+            state.currentIndex += 1;
+            if (state.currentIndex >= state.questions.length) {
+                // 全部完成
+                finishGame();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        // 完成游戏
+        function finishGame() {
+            state.isFinished = true;
+            stopTimer();
+
+            // 计算正确数
+            const correctCount = state.answers.filter(a => a.correct === true).length;
+            const total = state.questions.length;
+            const timestamp = Date.now();
+
+            // 保存记录
+            addRecord(state.account, correctCount, total, timestamp);
+
+            // 显示结果
+            showResult(correctCount, total);
+        }
+
+        // 显示结果页
+        function showResult(correct, total) {
+            showPage('result');
+            resultCorrect.textContent = correct;
+            resultAccount.textContent = `玩家：${state.account}`;
+
+            // 题目回顾
+            renderReview();
+
+            // 排行榜
+            renderRanking(state.account);
+
+            // 更新进度条（满）
+            progressBar.style.width = '100%';
+        }
+
+        // 渲染题目回顾
+        function renderReview() {
+            reviewList.innerHTML = '';
+            const qs = state.questions;
+            const ans = state.answers;
+
+            qs.forEach((q, idx) => {
+                const div = document.createElement('div');
+                div.className = 'review-item';
+
+                const userSel = ans[idx].selected;
+                const isCorrect = ans[idx].correct;
+                const correctLabel = LABELS[q.answer];
+                const userLabel = userSel !== null ? LABELS[userSel] : '（未选）';
+
+                const statusClass = isCorrect ? 'ok' : 'fail';
+                const statusText = isCorrect ? '✅ 正确' : '❌ 错误';
+
+                div.innerHTML = `
+                    <div class="r-question">${idx+1}. ${q.text}</div>
+                    <div class="r-answer">
+                        <span class="r-user">你的答案：${userLabel}</span>
+                        <span class="r-correct">正确答案：${correctLabel}</span>
+                        <span class="r-status ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+                reviewList.appendChild(div);
+            });
+        }
+
+        // 渲染排行榜
+        function renderRanking(currentAccount) {
+            const sorted = getSortedRanking();
+            const tbody = rankBody;
+            tbody.innerHTML = '';
+
+            if (sorted.length === 0) {
+                rankEmpty.style.display = 'block';
+                return;
+            }
+            rankEmpty.style.display = 'none';
+
+            // 只显示前20条
+            const show = sorted.slice(0, 20);
+            show.forEach((rec, idx) => {
+                const tr = document.createElement('tr');
+                if (rec.account === currentAccount) {
+                    tr.className = 'highlight-me';
+                }
+                const rankNum = idx + 1;
+                const medal = rankNum === 1 ? '🥇' : rankNum === 2 ? '🥈' : rankNum === 3 ? '🥉' : `#${rankNum}`;
+                tr.innerHTML = `
+                    <td class="rank-num">${medal}</td>
+                    <td class="rank-account">${rec.account}</td>
+                    <td class="rank-score">${rec.correct} / ${rec.total}</td>
+                    <td class="rank-time">${formatTime(rec.timestamp)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /* ============================================================
+           事件绑定
+           ============================================================ */
+
+        // 开始按钮
+        btnStart.addEventListener('click', () => {
+            const account = accountInput.value.trim();
+            if (!account) {
+                accountInput.focus();
+                accountInput.style.borderColor = '#f44336';
+                setTimeout(() => accountInput.style.borderColor = '', 1000);
+                return;
+            }
+            startGame(account);
+        });
+
+        // 回车登录
+        accountInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') btnStart.click();
+        });
+
+        // 再来一次（用同一账号）
+        btnReplay.addEventListener('click', () => {
+            if (state.account) {
+                startGame(state.account);
+            } else {
+                showPage('login');
+            }
+        });
+
+        // 换人玩
+        btnNewPlayer.addEventListener('click', () => {
+            showPage('login');
+            accountInput.value = '';
+            accountInput.focus();
+            // 重置状态
+            state.isFinished = true;
+            stopTimer();
+        });
+
+        // 初始显示登录页
+        showPage('login');
+
+        // 预填充演示账号（方便测试）
+        // accountInput.placeholder = '输入姓名，如：张乐怡';
+
+        // 额外：自动聚焦
+        accountInput.focus();
+
+        // 防止页面刷新时计时器继续
+        window.addEventListener('beforeunload', () => {
+            stopTimer();
+        });
+
+        // 如果从结果页刷新，回到登录
+        // 但保留排行榜数据
+
+        console.log('🎵 乐理闯关大赛已加载！');
+        console.log(`📚 题库共 ${TOTAL_QS} 道题`);
+
+        /* ============================================================
+           键盘快捷键（辅助）
+           ============================================================ */
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '1' && e.key <= '4') {
+                const idx = parseInt(e.key) - 1;
+                const btns = document.querySelectorAll('#optionsGrid .option-btn:not(.disabled)');
+                if (btns[idx]) btns[idx].click();
+            }
+        });
+    </script>
+
+</body>
+</html>
